@@ -8,17 +8,23 @@ namespace Business_Layer.Services
 {
     public class ProductService(IUnitOfWork _unitOfWork, IMapper _mapper) : IProductService
     {
-        public async Task<Product> AddProductAsync(ProductDto dto)
+        public async Task<Product?> AddProductAsync(ProductDto dto)
         {
-            var product = _mapper.Map<Product>(dto);
-            await _unitOfWork.GetRepository<Product, int>().AddAsync(product);
-            await _unitOfWork.CompleteAsync();
-            return product;
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+            {
+                var product = _mapper.Map<Product>(dto);
+                await _unitOfWork.GetRepository<Product, int>().AddAsync(product);
+                await _unitOfWork.CompleteAsync();
+                return product;
+            }
+            return null;
         }
 
-        public async Task<ProductDto> GetProductAsync(int id)
+        public async Task<ProductDto?> GetProductAsync(int id)
         {
             var product = await _unitOfWork.GetRepository<Product, int>().GetAsync(id);
+            if (product is null)
+                return null;
             var productToReturn = _mapper.Map<ProductDto>(product);
             return productToReturn;
         }
@@ -31,22 +37,16 @@ namespace Business_Layer.Services
 
         public async Task<ProductDto?> UpdateProductAsync(int id, ProductDto dto)
         {
-            var repo = _unitOfWork.GetRepository<Product, int>();
-            var product = await repo.GetAsync(id);
+            var product = await _unitOfWork.GetRepository<Product, int>().GetAsync(id);
 
-            if (product == null)
-                return null;
+            if (product is null) return null;
 
-            _mapper.Map(dto, product);
+            _mapper.Map(dto, product); // maps dto object to product object
 
-            repo.Update(product);
+            _unitOfWork.GetRepository<Product, int>().Update(product);
             await _unitOfWork.CompleteAsync();
 
             return _mapper.Map<ProductDto>(product);
-
-
-
         }
-
     }
 }

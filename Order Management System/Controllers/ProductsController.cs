@@ -19,14 +19,14 @@ namespace Order_Management_System.Controllers
         public async Task<ActionResult> GetProduct(int id)
         {
             var product = await _productService.GetProductAsync(id);
-            return Ok(product);
+            return product is not null ? Ok(product) : BadRequest("Product not found");
         }
 
         [HttpPost]  
         public async Task<ActionResult> AddProduct(ProductDto dto)
         {
             var product = await _productService.AddProductAsync(dto);
-            return Ok(product);
+            return product is not null ? Ok(product) : BadRequest("Invalid Input");
         }
 
         [HttpPut("{id}")]
@@ -34,10 +34,9 @@ namespace Order_Management_System.Controllers
         {
             var updatedProduct = await _productService.UpdateProductAsync(id, dto);
             if (updatedProduct == null)
-                return NotFound();
+                return NotFound("Product not found");
 
             return Ok(updatedProduct);
         }
-
     }
 }

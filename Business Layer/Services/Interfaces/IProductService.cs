@@ -11,8 +11,8 @@ namespace Business_Layer.Services.Interfaces
     public interface IProductService
     {
         public Task<IEnumerable<Product>> GetProductsAsync();
-        public Task<ProductDto> GetProductAsync(int id);
-        public Task<Product> AddProductAsync(ProductDto dto);
+        public Task<ProductDto?> GetProductAsync(int id);
+        public Task<Product?> AddProductAsync(ProductDto dto);
         public Task<ProductDto?> UpdateProductAsync(int id, ProductDto dto);
             }
 }
