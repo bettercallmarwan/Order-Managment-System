@@ -11,6 +11,8 @@ namespace Data_Access_Layer.Repositories.Interfaces
         Task<IEnumerable<TEntity>> GetAllAsync();
         Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> expression);
 
+        Task<IEnumerable<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes);
+
         Task<TEntity?> GetAsync(TKey id);
         Task AddAsync(TEntity entity);
         void Update(TEntity entity);

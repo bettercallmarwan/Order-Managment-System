@@ -7,9 +7,9 @@ namespace Data_Access_Layer.Models
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
         public decimal TotalAmount { get; set; }
         public string PaymentMethod { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } 
 
-
+            
 
         public int? CustomerId { get; set; }
         public Customer? Customer { get; set; }

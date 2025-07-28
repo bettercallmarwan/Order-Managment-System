@@ -24,6 +24,18 @@ namespace Data_Access_Layer.Repositories
             var entities = await _orderManagementDbContext.Set<TEntity>().Where(expression).ToListAsync();
             return entities;
         }
+        
+        public async Task<IEnumerable<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes)
+        {
+            IQueryable<TEntity> query = _orderManagementDbContext.Set<TEntity>();
+
+            foreach (var include in includes)
+                query = query.Include(include);
+
+            var entity = await query.ToListAsync();
+            return entity;
+        }
+
 
         public async Task<TEntity?> GetAsync(TKey id) => await _orderManagementDbContext.Set<TEntity>().FindAsync(id);
 
