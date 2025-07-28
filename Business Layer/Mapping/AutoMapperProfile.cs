@@ -19,7 +19,8 @@ namespace Business_Layer.Mapping
             .ForMember(dest => dest.Customer, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.Name : string.Empty))
             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.OrderItems));
 
-            CreateMap<OrderItem, OrderItemDto>();
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.Id));
 
 
         }
