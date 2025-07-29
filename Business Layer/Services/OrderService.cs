@@ -8,9 +8,50 @@ namespace Business_Layer.Services
 {
     public class OrderService(IUnitOfWork _unitOfWork, IMapper _mapper) : IOrderService
     {
-        public Task<OrderDetailsDto> CreateOrderAsync(CreateOrderDto dto)
+        public async Task<OrderDetailsDto> CreateOrderAsync(CreateOrderDto dto)
         {
-            throw new NotImplementedException();
+            var orderItems = new List<OrderItem>();
+            decimal total = 0;
+
+            foreach(var item in dto.Items)
+            {
+                var product = await _unitOfWork.GetRepository<Product, int>().GetAsync(item.ProductId);
+
+                if (product is null) throw new Exception("Order doesn't exist");
+
+                if(product.Stock < item.Quantity) throw new Exception("Not enough quantity in stock");
+
+                total += (product.Price * item.Quantity);
+                product.Stock -= item.Quantity;
+
+
+                orderItems.Add(
+                    new OrderItem
+                    {
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice,
+                        Discount = 0,
+                        OrderId = null
+                    });
+
+            }
+
+            decimal discout = total >= 200 ? 0.1m : total >= 100 ? 0.05m : 0;
+            total -= total * discout;
+
+            var order = new Order
+            {
+                CustomerId = dto.CustomerId,
+                PaymentMethod = dto.PaymentMethod,
+                Status = "pending",
+                TotalAmount = total,
+                OrderItems = orderItems
+            };
+
+            await _unitOfWork.GetRepository<Order, int>().AddAsync(order);
+            await _unitOfWork.CompleteAsync();
+
+            return _mapper.Map<OrderDetailsDto>(order);
         }
 
 
@@ -40,49 +81,7 @@ namespace Business_Layer.Services
 
 
 
-//public async Task<OrderDetailsDto> CreateOrderAsync(CreateOrderDto dto)
-//{
-//    var orderItems = new List<OrderItem>();
-//    decimal total = 0;
 
-//    foreach (var item in dto.Items)
-//    {
-//        var product = await _unitOfWork.GetRepository<Product, int>().GetAsync(item.ProductId)
-//                      ?? throw new Exception("Product not found");
-
-//        if (product.Stock < item.Quantity)
-//            throw new Exception($"Insufficient stock for product {product.Name}");
-
-//        decimal itemTotal = product.Price * item.Quantity;
-//        orderItems.Add(new OrderItem
-//        {
-//            Quantity = item.Quantity,
-//            UnitPrice = product.Price,
-//            Discount = 0,
-//            OrderId = null
-//        });
-
-//        product.Stock -= item.Quantity;
-//        total += itemTotal;
-//    }
-
-//    decimal discount = total >= 200 ? 0.1m : total >= 100 ? 0.05m : 0;
-//    total -= total * discount;
-
-//    var order = new Order
-//    {
-//        CustomerId = dto.CustomerId,
-//        PaymentMethod = dto.PaymentMethod,
-//        Status = "Pending",
-//        TotalAmount = total,
-//        OrderItems = orderItems
-//    };
-
-//    await _unitOfWork.GetRepository<Order, int>().AddAsync(order);
-//    await _unitOfWork.CompleteAsync();
-
-//    return _mapper.Map<OrderDetailsDto>(order);
-//}
 
 //public async Task<OrderDetailsDto?> GetOrderAsync(int id)
 //{
